@@ -1,0 +1,64 @@
+{% load staticfiles %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>{% block title %}{% endblock %}</title>
+    <link href="{% static "css/base.css" %}" rel="stylesheet">
+</head>
+
+<body>
+    <div id="header">
+        {% if messages %}
+        <ul class="messages">
+            {% for message in messages %}
+            <li class="{{ message.tags }}">
+            {{ message|safe }}<a href='#' class="close">x</a>
+            </li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+        
+        <span class="logo">Bookmarks</span>
+        {% if request.user.is_authenticated %}
+            <ul class="menu">
+                <li {% if section == 'dashboard' %} class="selected"{% endif %}><a href="{% url 'dashboard' %}">My dashboard</a></li>
+                <li {% if section == 'images' %} class="selected"{% endif %}><a href="{% url 'images:list' %}">Images</a></li>
+                <li {% if section == 'people' %} class="selected"{% endif %}><a href="{% url 'user_list' %}">People</a></li>
+            </ul>
+        {% endif %}
+
+        {% if request.user.is_authenticated %}
+            Hello {{ request.user.first_name }}, {{ request.user.username }}, <a href="{% url 'logout' %}">logout</a>
+        {% else %}
+            <a href="{% url 'login' %}">Log-in</a>
+        {% endif %}
+    </div>
+    <div id="content">
+        {% block content %}
+        {% endblock %}
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js"
+            integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo="
+            crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/js-cookie@2/src/js.cookie.min.js"></script>
+    <script>
+        let csrftoken = Cookies.get('csrftoken');
+
+        function csrfSafeMethon(method){
+            return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+        }
+
+        $.ajaxSetup({
+            beforeSend: function(xhr,settings){
+                xhr.setRequestHeader("X-CSRFToken", csrftoken);
+            }
+        })
+
+        $(document).ready(function(){
+            {% block domready %}
+            {% endblock %}
+        });
+    </script>
+</body>
+</html>
